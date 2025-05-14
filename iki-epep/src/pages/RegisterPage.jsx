@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// RegisterPage.jsx
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -7,6 +8,14 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    // Redirect ke home jika sudah login
+    const loggedUser = localStorage.getItem('loggedUser');
+    if (loggedUser) {
+      navigate('/home');
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,6 +37,13 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validasi email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Format email tidak valid!');
+      return;
+    }
+
     const users = JSON.parse(localStorage.getItem('users')) || [];
 
     // Cek apakah username sudah terdaftar
@@ -37,10 +53,16 @@ export default function RegisterPage() {
       return;
     }
 
+    // Cek apakah email sudah terdaftar
+    const isEmailExists = users.find((user) => user.email === email);
+    if (isEmailExists) {
+      setError('Email sudah terdaftar!');
+      return;
+    }
+
     // Simpan ke localStorage
     users.push({ username, email, password });
     localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('loggedUser', JSON.stringify({ username, email }));
 
     setSuccess('Registrasi berhasil! Silakan login.');
     setTimeout(() => {
@@ -76,7 +98,7 @@ export default function RegisterPage() {
           <div className="mb-4">
             <label className="block mb-1 text-sm font-semibold">Email</label>
             <input
-              type="text"
+              type="email"
               name="email"
               value={form.email}
               onChange={handleChange}

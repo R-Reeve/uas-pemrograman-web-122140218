@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// LoginPage.jsx
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -6,6 +7,14 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Redirect ke home jika sudah login
+    const loggedUser = localStorage.getItem('loggedUser');
+    if (loggedUser) {
+      navigate('/home');
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,10 +31,19 @@ export default function LoginPage() {
     );
 
     if (foundUser) {
-        localStorage.setItem('loggedUser', JSON.stringify(foundUser));
-        alert('Login berhasil!');
-        navigate('/home');
-      } else {
+      // Tambahkan event untuk Navbar
+      const userToStore = {
+        username: foundUser.username,
+        email: foundUser.email
+      };
+      localStorage.setItem('loggedUser', JSON.stringify(userToStore));
+      
+      // Trigger event untuk update Navbar
+      window.dispatchEvent(new Event('storage'));
+      
+      alert('Login berhasil!');
+      navigate('/home');
+    } else {
       setError('Username atau password salah!');
     }
   };
