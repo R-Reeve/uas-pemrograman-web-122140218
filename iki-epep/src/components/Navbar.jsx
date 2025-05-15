@@ -78,11 +78,11 @@ export default function Navbar() {
               <Link to="/home" className="hover:text-blue-200 transition-colors font-medium">
                 Beranda
               </Link>
-              <Link to="/reviews" className="hover:text-blue-200 transition-colors font-medium">
-                Review
+              <Link to="/topics" className="hover:text-blue-200 transition-colors font-medium">
+                Forum Diskusi
               </Link>
-              <Link to="/reviews/add" className="hover:text-blue-200 transition-colors font-medium">
-                Tulis Review
+              <Link to="/topics/add" className="hover:text-blue-200 transition-colors font-medium">
+                Buat Topik
               </Link>
               {loggedIn ? (
                 <button
@@ -119,11 +119,11 @@ export default function Navbar() {
                 <Link to="/home" className="hover:text-blue-200 transition-colors py-1">
                   Beranda
                 </Link>
-                <Link to="/reviews" className="hover:text-blue-200 transition-colors py-1">
-                  Review
+                <Link to="/topics" className="hover:text-blue-200 transition-colors py-1">
+                  Forum Diskusi
                 </Link>
-                <Link to="/reviews/add" className="hover:text-blue-200 transition-colors py-1">
-                  Tulis Review
+                <Link to="/topics/add" className="hover:text-blue-200 transition-colors py-1">
+                  Buat Topik
                 </Link>
                 {loggedIn && (
                   <button

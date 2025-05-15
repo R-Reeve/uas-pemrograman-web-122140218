@@ -5,8 +5,8 @@ import Navbar from '../components/Navbar';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [latestReviews, setLatestReviews] = useState([]);
-  const [popularReviews, setPopularReviews] = useState([]);
+  const [latestTopics, setLatestTopics] = useState([]);
+  const [popularTopics, setPopularTopics] = useState([]);
   
   useEffect(() => {
     // Redirect jika belum login
@@ -16,21 +16,21 @@ export default function HomePage() {
       return;
     }
     
-    // Load reviews dari localStorage
-    const reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+    // Load topics dari localStorage
+    const topics = JSON.parse(localStorage.getItem('topics')) || [];
     
-    // Sort by date (newest first) untuk latest reviews
-    const sortedByDate = [...reviews].sort((a, b) => 
+    // Sort by date (newest first) untuk latest topics
+    const sortedByDate = [...topics].sort((a, b) => 
       new Date(b.createdAt) - new Date(a.createdAt)
     ).slice(0, 3); // Ambil 3 terbaru
     
-    // Sort by likes untuk popular reviews
-    const sortedByLikes = [...reviews].sort((a, b) => 
+    // Sort by likes untuk popular topics
+    const sortedByLikes = [...topics].sort((a, b) => 
       (b.likes?.length || 0) - (a.likes?.length || 0)
     ).slice(0, 3); // Ambil 3 terpopuler
     
-    setLatestReviews(sortedByDate);
-    setPopularReviews(sortedByLikes);
+    setLatestTopics(sortedByDate);
+    setPopularTopics(sortedByLikes);
   }, [navigate]);
 
   // Format date
@@ -57,7 +57,7 @@ export default function HomePage() {
               Iki Epep
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-2xl drop-shadow-md">
-              Review game Final Fantasy favorit, baca ulasan teman, dan bagikan pengalamanmu dengan komunitas gaming
+              Diskusikan game Final Fantasy favorit, berbagi pengalaman, dan terhubung dengan komunitas gaming
             </p>
           </div>
         </div>
@@ -66,24 +66,24 @@ export default function HomePage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Latest Reviews */}
+          {/* Latest Topics */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="bg-blue-600 text-white py-3 px-4 flex items-center">
-                <span className="text-xl font-bold">Review Terbaru</span>
+                <span className="text-xl font-bold">Diskusi Terbaru</span>
               </div>
               
               <div className="p-4">
-                {latestReviews.length > 0 ? (
+                {latestTopics.length > 0 ? (
                   <div className="space-y-6">
-                    {latestReviews.map((review, index) => (
+                    {latestTopics.map((topic, index) => (
                       <div key={index} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
                         <div className="flex items-start">
                           <div className="flex-shrink-0 mr-4">
-                            {review.imageUrl ? (
+                            {topic.imageUrl ? (
                               <img 
-                                src={review.imageUrl} 
-                                alt={review.title} 
+                                src={topic.imageUrl} 
+                                alt={topic.title} 
                                 className="w-20 h-20 object-cover rounded"
                               />
                             ) : (
@@ -93,23 +93,23 @@ export default function HomePage() {
                             )}
                           </div>
                           <div className="flex-grow">
-                            <h3 className="text-lg font-bold text-blue-800">{review.title}</h3>
+                            <h3 className="text-lg font-bold text-blue-800">{topic.title}</h3>
                             <div className="flex items-center text-sm text-gray-600 mb-1">
-                              <span>Oleh: {review.username}</span>
+                              <span>Oleh: {topic.username}</span>
                               <span className="mx-2">•</span>
-                              <span>{formatDate(review.createdAt)}</span>
+                              <span>{formatDate(topic.createdAt)}</span>
                             </div>
                             <p className="text-gray-700 line-clamp-2">
-                              {review.content}
+                              {topic.content}
                             </p>
                             <div className="mt-2 flex items-center space-x-4">
                               <div className="flex items-center text-yellow-500">
                                 <span className="mr-1">★</span>
-                                <span className="text-gray-700">{review.likes?.length || 0} likes</span>
+                                <span className="text-gray-700">{topic.likes?.length || 0} likes</span>
                               </div>
                               <div className="flex items-center text-gray-600">
                                 <span className="mr-1">💬</span>
-                                <span>{review.comments?.length || 0} komentar</span>
+                                <span>{topic.comments?.length || 0} balasan</span>
                               </div>
                             </div>
                           </div>
@@ -119,48 +119,48 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    <p>Belum ada review. Jadilah yang pertama menulis review!</p>
+                    <p>Belum ada topik diskusi. Jadilah yang pertama membuat topik diskusi!</p>
                   </div>
                 )}
                 
                 <div className="mt-4 text-center">
                   <Link 
-                    to="/reviews" 
+                    to="/topics" 
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    Lihat Semua Review →
+                    Lihat Semua Diskusi →
                   </Link>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Sidebar - Only Popular Reviews */}
+          {/* Sidebar - Only Popular Topics */}
           <div>
-            {/* Popular Reviews */}
+            {/* Popular Topics */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="bg-yellow-500 text-white py-3 px-4">
-                <span className="text-xl font-bold">Review Populer</span>
+                <span className="text-xl font-bold">Diskusi Populer</span>
               </div>
               
               <div className="p-4">
-                {popularReviews.length > 0 ? (
+                {popularTopics.length > 0 ? (
                   <div className="space-y-4">
-                    {popularReviews.map((review, index) => (
+                    {popularTopics.map((topic, index) => (
                       <div key={index} className="border-b border-gray-200 pb-3 last:border-0 last:pb-0">
-                        <h3 className="font-bold text-blue-800">{review.title}</h3>
+                        <h3 className="font-bold text-blue-800">{topic.title}</h3>
                         <div className="text-sm text-gray-500">
-                          {review.likes?.length || 0} likes • {review.comments?.length || 0} komentar
+                          {topic.likes?.length || 0} likes • {topic.comments?.length || 0} balasan
                         </div>
                         <div className="text-sm text-gray-700 mt-1">
-                          Oleh: {review.username}
+                          Oleh: {topic.username}
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-6 text-gray-500">
-                    <p>Belum ada review populer.</p>
+                    <p>Belum ada diskusi populer.</p>
                   </div>
                 )}
               </div>
@@ -183,7 +183,7 @@ export default function HomePage() {
 
           </div>
           <div className="border-t border-blue-700 mt-8 pt-4 text-center text-blue-200">
-            <p>© 2025 Game Reviews. All rights reserved.</p>
+            <p>© 2025 Game Forums. All rights reserved.</p>
           </div>
         </div>
       </footer>
