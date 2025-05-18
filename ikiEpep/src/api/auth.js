@@ -1,3 +1,4 @@
+/*auth.js*/
 export const loginUser = async ({ username, password }) => {
     await new Promise(res => setTimeout(res, 500));
     return { message: `Selamat datang, ${username}!` };
