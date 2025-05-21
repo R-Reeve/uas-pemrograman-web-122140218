@@ -31,10 +31,7 @@ export default function HomePage() {
     ).slice(0, 5); // Ambil 5 terpopuler
 
     // Featured topics (random selection with image, if available)
-    const topicsWithImages = topics.filter(topic => topic.imageUrl);
-    const randomFeatured = topicsWithImages.length > 0 
-      ? [...topicsWithImages].sort(() => 0.5 - Math.random()).slice(0, 3)
-      : [...topics].sort(() => 0.5 - Math.random()).slice(0, 3);
+    const randomFeatured = [...topics].sort(() => 0.5 - Math.random()).slice(0, 3);
     
     setLatestTopics(sortedByDate);
     setPopularTopics(sortedByLikes);
@@ -51,22 +48,25 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section - Updated with pure Tailwind CSS */}
       <div className="relative">
         <div 
-          className="relative py-16 bg-cover bg-center"
-          style={{ 
-            backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://i.imgur.com/WJ7TB4h.jpg')",
-            minHeight: "500px"
-          }}
+          className="relative py-16 bg-gradient-to-b from-blue-900/90 to-gray-900/90"
+          style={{ minHeight: "500px" }}
         >
           <div className="max-w-7xl mx-auto px-4 py-16 flex flex-col items-center justify-center text-center">
-            <div className="mb-6 animate-pulse">
-              <img 
-                src="https://i.imgur.com/J9lwPeH.png" 
-                alt="Final Fantasy Logo" 
-                className="h-24 mx-auto"
-              />
+            <div className="mb-6">
+              {/* Logo placeholder using pure CSS */}
+              <div className="h-24 w-24 mx-auto relative animate-pulse">
+                <div className="absolute inset-0 bg-blue-500 rounded-full opacity-20"></div>
+                <div className="absolute inset-2 bg-blue-600 rounded-full opacity-40"></div>
+                <div className="absolute inset-4 bg-blue-700 rounded-full opacity-60"></div>
+                <div className="absolute inset-6 bg-blue-800 rounded-full opacity-80"></div>
+                <div className="absolute inset-8 bg-blue-900 rounded-full"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">FF</span>
+                </div>
+              </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg font-serif tracking-wide">
               Final Fantasy Forum
@@ -122,11 +122,14 @@ export default function HomePage() {
                   key={idx} 
                   className="bg-gray-900/50 border border-blue-900/30 rounded-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-900/20"
                 >
-                  <div className="h-48 bg-cover bg-center" style={{ 
-                    backgroundImage: topic.imageUrl 
-                      ? `url(${topic.imageUrl})` 
-                      : "url('https://i.imgur.com/WXpHPcN.jpg')"
-                  }} />
+                  {/* Updated featured topic image section with pure Tailwind CSS */}
+                  <div className="h-48 bg-gradient-to-br from-blue-900 to-indigo-800 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-blue-700/30 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      </svg>
+                    </div>
+                  </div>
                   <div className="p-4">
                     <h3 className="text-xl font-bold text-blue-300 mb-2 line-clamp-1">{topic.title}</h3>
                     <p className="text-gray-400 text-sm mb-3 line-clamp-2">{topic.content}</p>
@@ -169,19 +172,12 @@ export default function HomePage() {
                       >
                         <div className="flex items-start">
                           <div className="flex-shrink-0 mr-4">
-                            {topic.imageUrl ? (
-                              <img 
-                                src={topic.imageUrl} 
-                                alt={topic.title} 
-                                className="w-20 h-20 object-cover rounded-md"
-                              />
-                            ) : (
-                              <div className="w-20 h-20 bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                              </div>
-                            )}
+                            {/* Topic thumbnail placeholder using pure CSS */}
+                            <div className="w-20 h-20 bg-gradient-to-br from-blue-800 to-indigo-900 rounded-md flex items-center justify-center text-blue-300">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                              </svg>
+                            </div>
                           </div>
                           <div className="flex-grow">
                             <h3 className="text-lg font-bold text-blue-300">{topic.title}</h3>

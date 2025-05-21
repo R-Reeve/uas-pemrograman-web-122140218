@@ -9,7 +9,6 @@ export default function TopicListPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
@@ -59,20 +58,9 @@ export default function TopicListPage() {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
 
-  // Get available categories from topics
-  const getCategories = () => {
-    const categories = new Set(topics.map(topic => topic.category || 'general'));
-    return ['all', ...Array.from(categories)];
-  };
-
   // Handle search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-  };
-
-  // Handle category filter change
-  const handleCategoryChange = (e) => {
-    setCategoryFilter(e.target.value);
   };
 
   // Handle sort change
@@ -91,10 +79,6 @@ export default function TopicListPage() {
     .filter(topic => 
       topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       topic.content.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    // Filter by category
-    .filter(topic => 
-      categoryFilter === 'all' || topic.category === categoryFilter
     )
     // Sort based on selected sort method
     .sort((a, b) => {
@@ -158,10 +142,7 @@ export default function TopicListPage() {
       
       {/* Header dengan background FF-style */}
       <div 
-        className="bg-cover bg-center py-12 px-4 text-center"
-        style={{ 
-          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), url('https://i.imgur.com/dtNlUBm.jpg')",
-        }}
+        className="bg-gradient-to-b from-blue-700 to-blue-900 py-12 px-4 text-center"
       >
         <h1 className="text-4xl font-bold text-blue-300 font-serif mb-4">Forum Diskusi Final Fantasy</h1>
         <p className="text-blue-200 max-w-2xl mx-auto">
@@ -173,25 +154,8 @@ export default function TopicListPage() {
         {/* Filter dan Search Controls */}
         <div className="bg-gray-800 rounded-lg border border-blue-900/30 p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Left Side - Filter & Sort */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              {/* Category Filter */}
-              <div className="w-full sm:w-36">
-                <label htmlFor="categoryFilter" className="block text-sm text-gray-400 mb-1">Kategori</label>
-                <select
-                  id="categoryFilter"
-                  value={categoryFilter}
-                  onChange={handleCategoryChange}
-                  className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {getCategories().map(category => (
-                    <option key={category} value={category}>
-                      {category === 'all' ? 'Semua Kategori' : getCategoryLabel(category)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
+            {/* Left Side - Sort */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">              
               {/* Sort By */}
               <div className="w-full sm:w-48">
                 <label htmlFor="sortBy" className="block text-sm text-gray-400 mb-1">Urutkan</label>
