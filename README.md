@@ -1,21 +1,23 @@
-# Aplikasi React Router
+# Aplikasi React Router - Forum Final Fantasy
 
 ## Deskripsi
 
-Ini adalah aplikasi web fullstack yang dibangun menggunakan **React** (dengan Vite) di sisi frontend dan **Python Pyramid** di sisi backend. Aplikasi ini menggunakan **React Router** untuk navigasi antar halaman serta dilengkapi dengan sistem autentikasi dan fitur manajemen topik. Untuk manajemen basis data, digunakan **SQLAlchemy** sebagai ORM dan **PostgreSQL** sebagai sistem basis data relasional.
+Ini adalah aplikasi web fullstack berbasis **React** (dengan Vite) dan **Python Pyramid** yang dirancang sebagai **forum online untuk para penggemar Final Fantasy**. Pengguna dapat membuat akun, login, melihat daftar topik diskusi, menambahkan topik baru, serta melihat detail dari setiap topik yang dibahas.
+
+Aplikasi ini menggunakan **React Router** untuk navigasi antar halaman, serta memiliki sistem autentikasi dan fitur manajemen topik. Di sisi backend, digunakan **SQLAlchemy** sebagai ORM dan **PostgreSQL** sebagai basis data utama.
 
 ## Struktur Aplikasi
 
 ### Frontend (React + Vite)
 
 - **React** digunakan untuk membangun antarmuka pengguna (UI).
-- **Vite** digunakan sebagai bundler yang ringan dan cepat untuk pengembangan aplikasi React.
-- **React Router DOM** digunakan untuk menangani routing antar halaman.
+- **Vite** digunakan sebagai bundler ringan dan cepat.
+- **React Router DOM** digunakan untuk routing halaman seperti login, registrasi, home, dan forum.
 
 ### Backend (Python Pyramid + SQLAlchemy)
 
-- **Python Pyramid** digunakan sebagai framework web backend yang ringan namun powerful.
-- **SQLAlchemy** digunakan sebagai Object-Relational Mapper (ORM) untuk mempermudah interaksi dengan database.
+- **Python Pyramid** digunakan sebagai framework backend untuk menangani permintaan API dan logika server.
+- **SQLAlchemy** digunakan untuk mengelola interaksi basis data secara efisien.
 - **PostgreSQL** digunakan sebagai sistem basis data relasional.
 
 ## Struktur Komponen
@@ -28,34 +30,36 @@ Ini adalah aplikasi web fullstack yang dibangun menggunakan **React** (dengan Vi
 ### Halaman-halaman (Pages)
 
 - `LoginPage`  
-  Halaman untuk login pengguna.
+  Halaman login pengguna untuk mengakses forum.
 
 - `RegisterPage`  
-  Halaman untuk registrasi pengguna baru.
+  Halaman untuk registrasi pengguna baru yang ingin bergabung.
 
 - `HomePage`  
-  Halaman utama yang ditampilkan setelah pengguna berhasil login.
+  Halaman utama forum setelah login, menampilkan ringkasan topik terbaru.
 
 - `TopicListPage`  
-  Halaman yang menampilkan daftar topik yang tersedia.
+  Menampilkan daftar topik diskusi seputar Final Fantasy.
 
 - `TopicAddPage`  
-  Halaman untuk menambahkan topik baru.
+  Halaman untuk membuat topik baru oleh pengguna.
 
 - `TopicDetailPage`  
-  Halaman yang menampilkan detail dari topik tertentu.
+  Menampilkan detail topik dan diskusi di dalamnya.
 
 ## Teknologi yang Digunakan
 
 ### Frontend
 
 - **React** – Library JavaScript untuk membangun antarmuka pengguna.
-- **React Router DOM** – Untuk navigasi halaman dalam aplikasi React.
-- **JSX** – Sintaks khusus React yang memungkinkan penulisan HTML di dalam JavaScript.
-- **Vite** – Build tool modern dan super cepat untuk proyek React.
+- **React Router DOM** – Untuk navigasi antar halaman.
+- **JSX** – Sintaks JavaScript yang memungkinkan penggunaan HTML langsung dalam kode.
+- **Vite** – Build tool modern untuk React yang sangat cepat.
 
 ### Backend
 
-- **Python Pyramid** – Framework web Python yang fleksibel dan scalable.
-- **SQLAlchemy** – ORM Python untuk memetakan objek Python ke tabel database.
-- **PostgreSQL** – Sistem manajemen basis data relasional open-source yang kuat.
+- **Python Pyramid** – Framework backend yang ringan dan fleksibel.
+- **SQLAlchemy** – ORM untuk memetakan data Python ke tabel PostgreSQL.
+- **PostgreSQL** – Sistem basis data relasional open-source yang tangguh.
+
+---
