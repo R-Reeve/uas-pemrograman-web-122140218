@@ -1,4 +1,4 @@
-// ikiEepep/src/pages/TopicAddPage.jsx
+// TopicAddPage.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -57,49 +57,45 @@ export default function TopicAddPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
+    
     if (!title.trim()) {
       alert('Judul topik tidak boleh kosong.');
       return;
     }
-
+    
     if (!content.trim()) {
       alert('Konten diskusi tidak boleh kosong.');
       return;
     }
-
+    
     setIsLoading(true);
+    
+    // Simulasi loading untuk memberikan UX yang lebih baik
+    setTimeout(() => {
+      const newTopic = {
+        username: user.username,
+        title: title.trim(),
+        content: content.trim(),
+        likes: [], // Array untuk menyimpan username user yang like
+        comments: [], // Array untuk menyimpan komentar
+        createdAt: new Date().toISOString(),
+      };
 
-    try {
-      const loggedInUser = JSON.parse(localStorage.getItem('loggedUser')); // Assuming user info is in localStorage
-      const token = loggedInUser?.token; // Example: Assuming a 'token' field
-
-      const response = await fetch('localhost:6543/topics', { // Replace with your backend URL
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Example: Using a Bearer token
-        },
-        body: JSON.stringify({ title: title.trim(), content: content.trim() }),
-      });
-
-      if (response.ok) {
-        setIsLoading(false);
-        alert('Topik diskusi berhasil ditambahkan.');
-        navigate('/topics');
-      } else {
-        const errorData = await response.json();
-        setIsLoading(false);
-        alert(`Gagal menambahkan topik: ${errorData?.message || 'Terjadi kesalahan'}`);
-        console.error('Error adding topic:', errorData);
+      // Tambahkan image jika ada
+      if (imagePreview) {
+        newTopic.imageUrl = imagePreview; // Simpan gambar sebagai base64
       }
-    } catch (error) {
+
+      const existingTopics = JSON.parse(localStorage.getItem('topics')) || [];
+      existingTopics.push(newTopic);
+      localStorage.setItem('topics', JSON.stringify(existingTopics));
+
       setIsLoading(false);
-      alert(`Terjadi kesalahan: ${error.message}`);
-      console.error('Error adding topic:', error);
-    }
+      alert('Topik diskusi berhasil ditambahkan.');
+      navigate('/topics');
+    }, 1000);
   };
 
   return (

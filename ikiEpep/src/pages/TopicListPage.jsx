@@ -1,4 +1,4 @@
-// ikiEepep/src/pages/TopicListPage.jsx
+// TopicListPage.jsx
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -9,6 +9,7 @@ export default function TopicListPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
@@ -58,9 +59,20 @@ export default function TopicListPage() {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
 
+  // Get available categories from topics
+  const getCategories = () => {
+    const categories = new Set(topics.map(topic => topic.category || 'general'));
+    return ['all', ...Array.from(categories)];
+  };
+
   // Handle search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  // Handle category filter change
+  const handleCategoryChange = (e) => {
+    setCategoryFilter(e.target.value);
   };
 
   // Handle sort change
@@ -80,6 +92,10 @@ export default function TopicListPage() {
       topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       topic.content.toLowerCase().includes(searchTerm.toLowerCase())
     )
+    // Filter by category
+    .filter(topic => 
+      categoryFilter === 'all' || topic.category === categoryFilter
+    )
     // Sort based on selected sort method
     .sort((a, b) => {
       switch(sortBy) {
@@ -95,41 +111,6 @@ export default function TopicListPage() {
       }
     });
 
-  // Fungsi untuk mendapatkan ikon kategori
-  const getCategoryIcon = (category) => {
-    switch(category) {
-      case 'ff7':
-        return "⚔️";
-      case 'ff14':
-        return "🌙";
-      case 'ff16':
-        return "🔥";
-      case 'tactics':
-        return "♟️";
-      case 'general':
-      default:
-        return "📜";
-    }
-  };
-
-  // Fungsi untuk mendapatkan label kategori
-  const getCategoryLabel = (category) => {
-    switch(category) {
-      case 'ff7':
-        return "FF VII";
-      case 'ff14':
-        return "FF XIV";
-      case 'ff16':
-        return "FF XVI";
-      case 'tactics':
-        return "FF Tactics";
-      case 'general':
-        return "General";
-      default:
-        return category.toUpperCase();
-    }
-  };
-
   // Fungsi untuk membuat preview konten
   const getContentPreview = (content) => {
     if (content.length <= 200) return content;
@@ -142,8 +123,7 @@ export default function TopicListPage() {
       
       {/* Header dengan background FF-style */}
       <div 
-        className="bg-gradient-to-b from-blue-700 to-blue-900 py-12 px-4 text-center"
-      >
+        className="bg-cover bg-center py-12 px-4 text-center">
         <h1 className="text-4xl font-bold text-blue-300 font-serif mb-4">Forum Diskusi Final Fantasy</h1>
         <p className="text-blue-200 max-w-2xl mx-auto">
           Berbagi pengalaman, pendapat, dan informasi seputar game Final Fantasy favorit Anda
@@ -154,8 +134,25 @@ export default function TopicListPage() {
         {/* Filter dan Search Controls */}
         <div className="bg-gray-800 rounded-lg border border-blue-900/30 p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Left Side - Sort */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">              
+            {/* Left Side - Filter & Sort */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+              {/* Category Filter */}
+              <div className="w-full sm:w-36">
+                <label htmlFor="categoryFilter" className="block text-sm text-gray-400 mb-1">Kategori</label>
+                <select
+                  id="categoryFilter"
+                  value={categoryFilter}
+                  onChange={handleCategoryChange}
+                  className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {getCategories().map(category => (
+                    <option key={category} value={category}>
+                      {category === 'all' ? 'Semua Kategori' : getCategoryLabel(category)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
               {/* Sort By */}
               <div className="w-full sm:w-48">
                 <label htmlFor="sortBy" className="block text-sm text-gray-400 mb-1">Urutkan</label>

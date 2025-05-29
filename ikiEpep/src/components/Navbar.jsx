@@ -1,4 +1,4 @@
-// ikiEpep/src/components/Navbar.jsx
+// Navbar.jsx
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -152,6 +152,7 @@ export default function Navbar() {
           <nav className="text-sm">
             <ol className="list-none p-0 inline-flex">
               <li className="flex items-center">
+                <Link to="/home" className="text-blue-400 hover:text-blue-300">Home</Link>
                 {location.pathname !== '/home' && (
                   <>
                     <svg className="fill-current w-3 h-3 mx-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
