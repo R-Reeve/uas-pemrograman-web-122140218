@@ -1,0 +1,10 @@
+alembic
+plaster-pastedeploy
+pyramid
+pyramid-jinja2
+pyramid-debugtoolbar
+waitress
+SQLAlchemy
+psycopg2-binary
+pyramid-tm
+pyramid-sqlalchemy

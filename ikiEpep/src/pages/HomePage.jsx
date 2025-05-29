@@ -1,13 +1,15 @@
-// HomePage.jsx
+// ikiEepep/src/pages/HomePage.jsx
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../auth';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [latestTopics, setLatestTopics] = useState([]);
   const [popularTopics, setPopularTopics] = useState([]);
   const [featuredTopics, setFeaturedTopics] = useState([]);
+  
   
   useEffect(() => {
     // Redirect jika belum login

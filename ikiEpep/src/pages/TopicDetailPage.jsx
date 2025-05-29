@@ -1,4 +1,4 @@
-// TopicDetailPage.jsx
+// ikiEepep/src/pages/TopicDetailPage.jsx
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';

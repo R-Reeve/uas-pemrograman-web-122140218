@@ -1,115 +1,183 @@
-// LoginPage.jsx
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { useAuth } from "../auth";
 
-export default function LoginPage() {
+function LoginPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Redirect if already authenticated
   useEffect(() => {
-    // Redirect ke home jika sudah login
-    const loggedUser = localStorage.getItem('loggedUser');
-    if (loggedUser) {
+    if (isAuthenticated && !authLoading) {
       navigate('/home');
     }
-  }, [navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError("");
+    setSuccess(false);
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    const { username, password } = formData;
 
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    const foundUser = storedUsers.find(
-      (user) =>
-        user.username === form.username && user.password === form.password
-    );
+    if (!username || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
 
-    if (foundUser) {
-      // Tambahkan event untuk Navbar
-      const userToStore = {
-        username: foundUser.username,
-        email: foundUser.email
-      };
-      localStorage.setItem('loggedUser', JSON.stringify(userToStore));
+    // Debug logging
+    console.log("Attempting login with:", { username, password: "***" });
+
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      await login({ username, password });
       
-      // Trigger event untuk update Navbar
-      window.dispatchEvent(new Event('storage'));
+      // Success feedback
+      setSuccess(true);
+      console.log("Login successful, redirecting...");
       
-      alert('Login berhasil!');
-      navigate('/home');
-    } else {
-      setError('Username atau password salah!');
+      // Small delay to show success message before redirect
+      setTimeout(() => {
+        navigate('/home');
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error.message);
+      setSuccess(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-900 bg-[url('https://via.placeholder.com/1920x1080?text=FF+Background')] bg-cover bg-center bg-blend-overlay">
-      <Navbar />
-      <div className="flex items-center justify-center h-[80vh]">
-        <div className="bg-gray-900 bg-opacity-80 p-8 rounded-lg shadow-2xl w-full max-w-md border border-blue-900">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-blue-400 font-fantasy tracking-wider">LOGIN</h2>
-            <div className="w-16 h-1 bg-blue-500 mx-auto mt-2"></div>
-          </div>
+  // Show loading screen while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-blue-400 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
+  return (
+    <div className="min-h-screen bg-gray-900 bg bg-cover bg-center bg-blend-overlay">
+      <Navbar />
+      <div className="container mx-auto px-4 py-10 max-w-md">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center text-blue-400 font-fantasy tracking-wider">
+          Log In to Your Account
+        </h1>
+
+        <form onSubmit={handleLogin} className="bg-gray-900 bg-opacity-80 rounded-lg shadow-md p-6 space-y-5 border border-blue-900">
           {error && (
-            <div className="bg-red-900 bg-opacity-50 border border-red-700 text-red-300 px-4 py-2 rounded mb-4">
-              <p className="text-sm">{error}</p>
+            <div className="bg-red-900 bg-opacity-50 text-red-300 p-3 rounded border border-red-700">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-green-900 bg-opacity-50 text-green-300 p-3 rounded border border-green-700">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Login successful! Redirecting...
+              </div>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block mb-2 text-sm font-medium text-blue-300">Username</label>
-              <input
-                type="text"
-                name="username"
-                value={form.username}
-                onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-                placeholder="Masukkan username"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-2 text-sm font-medium text-blue-300">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-                minLength={8}
-                placeholder="Masukkan password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-800 to-indigo-900 hover:from-blue-700 hover:to-indigo-800 text-white font-medium py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors border border-blue-700"
-            >
-              Login
-            </button>
-          </form>
-
-          <div className="mt-8 text-center border-t border-gray-700 pt-4">
-            <p className="text-gray-400">
-              Belum punya akun?{' '}
-              <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">
-                Register
-              </Link>
-            </p>
+          <div>
+            <label htmlFor="username" className="block mb-1 font-semibold text-blue-300">
+              Username
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="your username"
+              className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              required
+              disabled={isLoading}
+            />
           </div>
-        </div>
+
+          <div>
+            <label htmlFor="password" className="block mb-1 font-semibold text-blue-300">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-blue-800 to-indigo-900 hover:from-blue-700 hover:to-indigo-800 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed text-white py-3 rounded font-semibold transition flex items-center justify-center"
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging In...
+              </>
+            ) : (
+              'Log In'
+            )}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-gray-400">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-400 font-semibold underline hover:text-blue-300 transition">
+            Sign Up
+          </Link>
+        </p>
+
+        {/* Debug info - remove in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-3 bg-gray-800 rounded text-xs text-gray-400">
+            <p className="font-semibold mb-2">Debug Info:</p>
+            <p>Username: {formData.username}</p>
+            <p>Password: {"*".repeat(formData.password.length)}</p>
+            <p>Auth Loading: {authLoading.toString()}</p>
+            <p>Is Authenticated: {isAuthenticated.toString()}</p>
+            <p>Form Loading: {isLoading.toString()}</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+export default LoginPage;
