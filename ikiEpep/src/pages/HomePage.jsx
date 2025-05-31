@@ -84,7 +84,7 @@ export default function HomePage() {
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg font-serif tracking-wide">
-              Final Fantasy Forum
+              Iki Epep
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-2xl text-blue-200 drop-shadow-md">
               Diskusikan game Final Fantasy favorit, berbagi pengalaman, dan terhubung dengan komunitas Warrior of Light lainnya

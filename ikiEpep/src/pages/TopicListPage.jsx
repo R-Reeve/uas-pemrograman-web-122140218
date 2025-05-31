@@ -9,14 +9,13 @@ export default function TopicListPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     // Cek login
     const loggedInUser = localStorage.getItem('loggedUser');
     if (!loggedInUser) {
-      alert('Anda harus login terlebih dahulu.');
+      //alert('Anda harus login terlebih dahulu.');
       navigate('/login');
     } else {
       setUser(JSON.parse(loggedInUser));
@@ -27,52 +26,51 @@ export default function TopicListPage() {
   }, [navigate]);
 
   const loadTopics = () => {
-    // Coba ambil dari key baru 'topics'
-    let stored = localStorage.getItem('topics');
-    if (!stored) {
-      // Fallback ke key lama 'reviews' jika 'topics' belum ada
-      stored = localStorage.getItem('reviews');
-      // Jika data ditemukan di 'reviews', pindahkan ke 'topics'
-      if (stored) {
-        localStorage.setItem('topics', stored);
+    try {
+      // Coba ambil dari key baru 'topics'
+      let stored = localStorage.getItem('topics');
+      if (!stored) {
+        // Fallback ke key lama 'reviews' jika 'topics' belum ada
+        stored = localStorage.getItem('reviews');
+        // Jika data ditemukan di 'reviews', pindahkan ke 'topics'
+        if (stored) {
+          localStorage.setItem('topics', stored);
+        }
       }
-    }
-    
-    if (stored) {
-      const parsedTopics = JSON.parse(stored);
       
-      // Memastikan setiap topik memiliki array comments, likes, dan category
-      parsedTopics.forEach(topic => {
-        if (!topic.comments) topic.comments = [];
-        if (!topic.likes) topic.likes = [];
-        if (!topic.category) topic.category = 'general';
-      });
-      
-      setTopics(parsedTopics);
+      if (stored) {
+        const parsedTopics = JSON.parse(stored);
+        
+        // Memastikan setiap topik memiliki array comments dan likes
+        parsedTopics.forEach(topic => {
+          if (!topic.comments) topic.comments = [];
+          if (!topic.likes) topic.likes = [];
+        });
+        
+        setTopics(parsedTopics);
+      } else {
+        setTopics([]);
+      }
+    } catch (error) {
+      console.error('Error loading topics:', error);
+      setTopics([]);
     }
     setLoading(false);
   };
 
   // Format date
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
-  };
-
-  // Get available categories from topics
-  const getCategories = () => {
-    const categories = new Set(topics.map(topic => topic.category || 'general'));
-    return ['all', ...Array.from(categories)];
+    try {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('id-ID', options);
+    } catch (error) {
+      return 'Invalid Date';
+    }
   };
 
   // Handle search
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-  };
-
-  // Handle category filter change
-  const handleCategoryChange = (e) => {
-    setCategoryFilter(e.target.value);
   };
 
   // Handle sort change
@@ -82,7 +80,13 @@ export default function TopicListPage() {
 
   // Handle click pada topik untuk navigasi ke detail
   const handleTopicClick = (index) => {
-    navigate(`/topics/${index}`);
+    // Find the actual index in the original topics array
+    const originalIndex = topics.findIndex(topic => 
+      topic.title === processedTopics[index].title && 
+      topic.username === processedTopics[index].username && 
+      topic.createdAt === processedTopics[index].createdAt
+    );
+    navigate(`/topics/${originalIndex >= 0 ? originalIndex : index}`);
   };
 
   // Filter dan sort topics
@@ -91,10 +95,6 @@ export default function TopicListPage() {
     .filter(topic => 
       topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       topic.content.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    // Filter by category
-    .filter(topic => 
-      categoryFilter === 'all' || topic.category === categoryFilter
     )
     // Sort based on selected sort method
     .sort((a, b) => {
@@ -113,6 +113,7 @@ export default function TopicListPage() {
 
   // Fungsi untuk membuat preview konten
   const getContentPreview = (content) => {
+    if (!content) return '';
     if (content.length <= 200) return content;
     return content.substring(0, 200) + '...';
   };
@@ -122,8 +123,7 @@ export default function TopicListPage() {
       <Navbar />
       
       {/* Header dengan background FF-style */}
-      <div 
-        className="bg-cover bg-center py-12 px-4 text-center">
+      <div className="bg-cover bg-center py-12 px-4 text-center">
         <h1 className="text-4xl font-bold text-blue-300 font-serif mb-4">Forum Diskusi Final Fantasy</h1>
         <p className="text-blue-200 max-w-2xl mx-auto">
           Berbagi pengalaman, pendapat, dan informasi seputar game Final Fantasy favorit Anda
@@ -134,26 +134,8 @@ export default function TopicListPage() {
         {/* Filter dan Search Controls */}
         <div className="bg-gray-800 rounded-lg border border-blue-900/30 p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Left Side - Filter & Sort */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              {/* Category Filter */}
-              <div className="w-full sm:w-36">
-                <label htmlFor="categoryFilter" className="block text-sm text-gray-400 mb-1">Kategori</label>
-                <select
-                  id="categoryFilter"
-                  value={categoryFilter}
-                  onChange={handleCategoryChange}
-                  className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {getCategories().map(category => (
-                    <option key={category} value={category}>
-                      {category === 'all' ? 'Semua Kategori' : getCategoryLabel(category)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Sort By */}
+            {/* Left Side - Sort */}
+            <div className="w-full md:w-auto">
               <div className="w-full sm:w-48">
                 <label htmlFor="sortBy" className="block text-sm text-gray-400 mb-1">Urutkan</label>
                 <select
@@ -246,7 +228,7 @@ export default function TopicListPage() {
             <ul className="divide-y divide-gray-700">
               {processedTopics.map((topic, index) => (
                 <li 
-                  key={index} 
+                  key={`${topic.title}-${topic.createdAt}-${index}`}
                   onClick={() => handleTopicClick(index)}
                   className="p-4 hover:bg-gray-700 cursor-pointer transition duration-150"
                 >
@@ -268,9 +250,6 @@ export default function TopicListPage() {
                     </div>
                     <div className="flex-grow">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
-                          {getCategoryIcon(topic.category)} {getCategoryLabel(topic.category)}
-                        </span>
                         {topic.editedAt && (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
                             Diedit

@@ -3,6 +3,34 @@ import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
+
+const ConfirmationModal = ({ isOpen, onConfirm, onCancel, title, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-2xl border border-blue-500/30 p-6 max-w-md w-full mx-4">
+        <h3 className="text-xl font-bold text-blue-200 mb-4">{title}</h3>
+        <p className="text-gray-300 mb-6">{message}</p>
+        <div className="flex space-x-3 justify-end">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded font-medium transition-colors shadow-md"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium transition-colors shadow-md"
+          >
+            Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function TopicDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,12 +42,16 @@ export default function TopicDetailPage() {
   const [editImagePreview, setEditImagePreview] = useState('');
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showDeleteTopicModal, setShowDeleteTopicModal] = useState(false);
+  const [showDeleteCommentModal, setShowDeleteCommentModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState(null);
+  
 
   useEffect(() => {
     // Cek login
     const loggedInUser = localStorage.getItem('loggedUser');
     if (!loggedInUser) {
-      alert('Anda harus login terlebih dahulu.');
+      //alert('Anda harus login terlebih dahulu.');
       navigate('/login');
       return;
     } else {
@@ -36,7 +68,7 @@ export default function TopicDetailPage() {
     
     // Validasi index
     if (isNaN(topicIndex) || topicIndex < 0 || topicIndex >= allTopics.length) {
-      alert('Topik tidak ditemukan.');
+      //alert('Topik tidak ditemukan.');
       navigate('/topics');
       return;
     }
@@ -118,17 +150,23 @@ export default function TopicDetailPage() {
 
   // Hapus komentar
   const deleteComment = (commentIndex) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus komentar ini?')) {
-      const allTopics = JSON.parse(localStorage.getItem('topics')) || [];
-      const topicIndex = parseInt(id);
-      
-      topic.comments.splice(commentIndex, 1);
-      
-      // Update state dan localStorage
-      setTopic({...topic});
-      allTopics[topicIndex] = topic;
-      localStorage.setItem('topics', JSON.stringify(allTopics));
-    }
+    setCommentToDelete(commentIndex);
+    setShowDeleteCommentModal(true);
+  };
+  
+  const confirmDeleteComment = () => {
+    const allTopics = JSON.parse(localStorage.getItem('topics')) || [];
+    const topicIndex = parseInt(id);
+    
+    topic.comments.splice(commentToDelete, 1);
+    
+    // Update state dan localStorage
+    setTopic({...topic});
+    allTopics[topicIndex] = topic;
+    localStorage.setItem('topics', JSON.stringify(allTopics));
+    
+    setShowDeleteCommentModal(false);
+    setCommentToDelete(null);
   };
 
   // Cek apakah pengguna sudah like topic ini
@@ -147,7 +185,7 @@ export default function TopicDetailPage() {
   // Fungsi untuk menyimpan hasil edit
   const saveEdit = () => {
     if (!editContent.trim()) {
-      alert('Topik tidak boleh kosong!');
+      //alert('Topik tidak boleh kosong!');
       return;
     }
     
@@ -183,16 +221,14 @@ export default function TopicDetailPage() {
 
   // Fungsi untuk menghapus topic
   const deleteTopic = () => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus topik ini?')) {
-      const allTopics = JSON.parse(localStorage.getItem('topics')) || [];
-      const topicIndex = parseInt(id);
-      
-      allTopics.splice(topicIndex, 1);
-      localStorage.setItem('topics', JSON.stringify(allTopics));
-      
-      alert('Topik berhasil dihapus.');
-      navigate('/topics');
-    }
+    const allTopics = JSON.parse(localStorage.getItem('topics')) || [];
+    const topicIndex = parseInt(id);
+    
+    allTopics.splice(topicIndex, 1);
+    localStorage.setItem('topics', JSON.stringify(allTopics));
+    
+    setShowDeleteTopicModal(false);
+    navigate('/topics');
   };
 
   // Cek apakah topic milik user yang sedang login
@@ -212,14 +248,14 @@ export default function TopicDetailPage() {
     if (file) {
       // Pastikan file adalah gambar
       if (!file.type.startsWith('image/')) {
-        alert('File harus berupa gambar (JPG, PNG, GIF, dll)');
+        //alert('File harus berupa gambar (JPG, PNG, GIF, dll)');
         return;
       }
       
       // Batasi ukuran file (misalnya 2MB)
       const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
       if (file.size > maxSize) {
-        alert('Ukuran gambar terlalu besar. Maksimal 2MB.');
+        //alert('Ukuran gambar terlalu besar. Maksimal 2MB.');
         return;
       }
 
@@ -304,15 +340,34 @@ export default function TopicDetailPage() {
                     Edit
                   </button>
                   <button 
-                    onClick={deleteTopic}
-                    className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors shadow-md flex items-center"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    Hapus
-                  </button>
+  onClick={() => setShowDeleteTopicModal(true)}
+  className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors shadow-md flex items-center"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+  </svg>
+  Hapus
+</button>
+<ConfirmationModal
+  isOpen={showDeleteTopicModal}
+  onConfirm={deleteTopic}
+  onCancel={() => setShowDeleteTopicModal(false)}
+  title="Hapus Topik"
+  message="Apakah Anda yakin ingin menghapus topik ini? Tindakan ini tidak dapat dibatalkan."
+/>
+
+<ConfirmationModal
+  isOpen={showDeleteCommentModal}
+  onConfirm={confirmDeleteComment}
+  onCancel={() => {
+    setShowDeleteCommentModal(false);
+    setCommentToDelete(null);
+  }}
+  title="Hapus Komentar"
+  message="Apakah Anda yakin ingin menghapus komentar ini???"
+/>
                 </div>
+                
               )}
             </div>
             

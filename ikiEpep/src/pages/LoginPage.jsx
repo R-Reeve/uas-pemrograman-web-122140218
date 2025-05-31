@@ -41,7 +41,7 @@ export default function LoginPage() {
       // Trigger event untuk update Navbar
       window.dispatchEvent(new Event('storage'));
       
-      alert('Login berhasil!');
+      //alert('Login berhasil!');
       navigate('/home');
     } else {
       setError('Username atau password salah!');
@@ -100,7 +100,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 text-center border-t border-gray-700 pt-4">
+          <div className="mt-4 text-center border-t border-gray-700 pt-4">
             <p className="text-gray-400">
               Belum punya akun?{' '}
               <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">

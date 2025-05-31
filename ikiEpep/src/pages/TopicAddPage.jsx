@@ -16,7 +16,7 @@ export default function TopicAddPage() {
   useEffect(() => {
     const loggedInUser = localStorage.getItem('loggedUser');
     if (!loggedInUser) {
-      alert('Anda harus login terlebih dahulu.');
+      //alert('Anda harus login terlebih dahulu.');
       navigate('/login');
     } else {
       setUser(JSON.parse(loggedInUser));
@@ -28,14 +28,14 @@ export default function TopicAddPage() {
     if (file) {
       // Pastikan file adalah gambar
       if (!file.type.startsWith('image/')) {
-        alert('File harus berupa gambar (JPG, PNG, GIF, dll)');
+        //alert('File harus berupa gambar (JPG, PNG, GIF, dll)');
         return;
       }
       
       // Batasi ukuran file (misalnya 2MB)
       const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
       if (file.size > maxSize) {
-        alert('Ukuran gambar terlalu besar. Maksimal 2MB.');
+        //alert('Ukuran gambar terlalu besar. Maksimal 2MB.');
         return;
       }
 
@@ -61,12 +61,12 @@ export default function TopicAddPage() {
     e.preventDefault();
     
     if (!title.trim()) {
-      alert('Judul topik tidak boleh kosong.');
+      //alert('Judul topik tidak boleh kosong.');
       return;
     }
     
     if (!content.trim()) {
-      alert('Konten diskusi tidak boleh kosong.');
+      //alert('Konten diskusi tidak boleh kosong.');
       return;
     }
     
@@ -93,7 +93,7 @@ export default function TopicAddPage() {
       localStorage.setItem('topics', JSON.stringify(existingTopics));
 
       setIsLoading(false);
-      alert('Topik diskusi berhasil ditambahkan.');
+      //alert('Topik diskusi berhasil ditambahkan.');
       navigate('/topics');
     }, 1000);
   };

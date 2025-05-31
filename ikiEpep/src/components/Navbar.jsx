@@ -36,7 +36,7 @@ export default function Navbar() {
     localStorage.removeItem('loggedUser');
     setLoggedIn(false);
     setUser(null);
-    alert('Anda telah logout!');
+    //alert('Anda telah logout!');
     navigate('/login');
   };
   
@@ -76,7 +76,7 @@ export default function Navbar() {
               <div className="bg-blue-50 p-1 rounded-full">
                 <span className="text-2xl font-fantasy text-blue-800">FF</span>
               </div>
-              <h1 className="text-2xl font-bold text-white font-fantasy tracking-wider">Final Fantasy Forum</h1>
+              <h1 className="text-2xl font-bold text-white font-fantasy tracking-wider">Iki Epep</h1>
             </Link>
             
             {/* Desktop Navigation */}
