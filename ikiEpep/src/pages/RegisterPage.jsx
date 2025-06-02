@@ -1,80 +1,85 @@
-// RegisterPage.jsx
+// my RegisterPage.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
+  // 1️⃣ Redirect away if already logged in (following friend's pattern)
   useEffect(() => {
-    // Redirect ke home jika sudah login
-    const loggedUser = localStorage.getItem('loggedUser');
-    if (loggedUser) {
-      navigate('/home');
+    if (localStorage.getItem("token")) {
+      navigate("/home", { replace: true });
     }
   }, [navigate]);
 
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
-    setSuccess('');
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError("");
   };
 
-  const handleRegister = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     const { username, email, password, confirmPassword } = form;
+
+    // Basic validation
     if (!username || !email || !password || !confirmPassword) {
-      setError('Semua field wajib diisi!');
+      setError("Semua field wajib diisi!");
       return;
     }
-
+    
     if (password.length < 8) {
-      setError('Password minimal 8 karakter!');
+      setError("Password minimal 8 karakter!");
       return;
     }
-
+    
     if (password !== confirmPassword) {
-      setError('Password dan konfirmasi password harus sama!');
+      setError("Password dan konfirmasi password harus sama!");
       return;
     }
 
-    // Validasi email format
+    // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Format email tidak valid!');
+      setError("Format email tidak valid!");
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+    setError("");
+    setMessage("");
 
-    // Cek apakah username sudah terdaftar
-    const isUserExists = users.find((user) => user.username === username);
-    if (isUserExists) {
-      setError('Username sudah terdaftar!');
-      return;
+    try {
+      const res = await fetch("http://localhost:6543/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (typeof data.error === "object" && data.error !== null) {
+          const messages = Object.values(data.error).flat().join(" ");
+          setError(messages || "Registrasi gagal");
+        } else {
+          setError(data.error || "Registrasi gagal");
+        }
+      } else {
+        setSuccess(true);
+        setMessage("Registrasi berhasil!");
+      }
+    } catch (err) {
+      setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     }
-
-    // Cek apakah email sudah terdaftar
-    const isEmailExists = users.find((user) => user.email === email);
-    if (isEmailExists) {
-      setError('Email sudah terdaftar!');
-      return;
-    }
-
-    // Simpan ke localStorage
-    users.push({ username, email, password });
-    localStorage.setItem('users', JSON.stringify(users));
-
-    setSuccess('Registrasi berhasil! Silakan login.');
-    setForm({ username: '', email: '', password: '', confirmPassword: '' });
-    
-    setTimeout(() => {
-      navigate('/login');
-    }, 1500);
   };
 
   return (
@@ -95,11 +100,17 @@ export default function RegisterPage() {
           
           {success && (
             <div className="bg-green-900 bg-opacity-50 border border-green-700 text-green-300 px-4 py-2 rounded mb-4">
-              <p className="text-sm">{success}</p>
+              <p className="text-sm">
+                {message} Silakan{" "}
+                <Link to="/login" className="text-blue-400 hover:text-blue-300 underline">
+                  login
+                </Link>
+                .
+              </p>
             </div>
           )}
 
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
               <label className="block mb-2 text-sm font-medium text-blue-300">Username</label>
               <input

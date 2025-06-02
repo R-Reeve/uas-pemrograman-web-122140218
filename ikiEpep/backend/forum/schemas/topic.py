@@ -5,7 +5,3 @@ class TopicSchema(Schema):
     title = fields.Str(required=True)
     content = fields.Str(required=True)
     username = fields.Str(required=True)
-
-class TopicCreateSchema(Schema):
-    title = fields.Str(required=True)
-    content = fields.Str(required=True)

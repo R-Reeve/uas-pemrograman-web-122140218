@@ -1,50 +1,70 @@
-// LoginPage.jsx
+// My LoginPage.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
 
+  // 1️⃣ Redirect away if already logged in (following friend's pattern)
   useEffect(() => {
-    // Redirect ke home jika sudah login
-    const loggedUser = localStorage.getItem('loggedUser');
-    if (loggedUser) {
-      navigate('/home');
+    if (localStorage.getItem("token")) {
+      navigate('/home', { replace: true });
     }
   }, [navigate]);
 
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError('');
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setMessage('');
 
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    const foundUser = storedUsers.find(
-      (user) =>
-        user.username === form.username && user.password === form.password
-    );
+    const { username, password } = form;
+    if (!username || !password) {
+      setError('Please fill in all fields.');
+      setIsLoading(false);
+      return;
+    }
 
-    if (foundUser) {
-      // Tambahkan event untuk Navbar
-      const userToStore = {
-        username: foundUser.username,
-        email: foundUser.email
-      };
-      localStorage.setItem('loggedUser', JSON.stringify(userToStore));
-      
-      // Trigger event untuk update Navbar
-      window.dispatchEvent(new Event('storage'));
-      
-      //alert('Login berhasil!');
-      navigate('/home');
-    } else {
-      setError('Username atau password salah!');
+    try {
+      // Replace with your actual API endpoint
+      const res = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        // 2️⃣ Store token and username (following friend's pattern)
+        localStorage.setItem("token", data.token);
+        localStorage.setItem('username', data.username);
+        
+        // Trigger event untuk update Navbar
+        window.dispatchEvent(new Event('storage'));
+        
+        setMessage("Login successful!");
+        navigate('/home', { replace: true });
+        console.log("token", data.token);
+        console.log("username", data.username);
+      } else {
+        setError(data.error || "Username or password is incorrect!");
+      }
+    } catch (err) {
+      setError(err.message || "An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,6 +81,12 @@ export default function LoginPage() {
           {error && (
             <div className="bg-red-900 bg-opacity-50 border border-red-700 text-red-300 px-4 py-2 rounded mb-4">
               <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {message && (
+            <div className="bg-green-900 bg-opacity-50 border border-green-700 text-green-300 px-4 py-2 rounded mb-4">
+              <p className="text-sm">{message}</p>
             </div>
           )}
 
@@ -87,16 +113,20 @@ export default function LoginPage() {
                 onChange={handleChange}
                 className="w-full bg-gray-800 border border-gray-700 text-white p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
-                minLength={8}
                 placeholder="Masukkan password"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-800 to-indigo-900 hover:from-blue-700 hover:to-indigo-800 text-white font-medium py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors border border-blue-700"
+              className={`w-full font-medium py-3 px-4 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors border border-blue-700 ${
+                isLoading
+                  ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-800 to-indigo-900 hover:from-blue-700 hover:to-indigo-800 text-white"
+              }`}
+              disabled={isLoading}
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </form>
 
