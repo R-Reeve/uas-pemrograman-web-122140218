@@ -1,6 +1,7 @@
-// TopicAddPage.jsx
-import { useState, useEffect, useRef } from 'react';
+// my TopicAddPage.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ChevronLeft, Plus, Upload, X, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 export default function TopicAddPage() {
@@ -11,35 +12,50 @@ export default function TopicAddPage() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('loggedUser');
-    if (!loggedInUser) {
-      //alert('Anda harus login terlebih dahulu.');
-      navigate('/login');
-    } else {
-      setUser(JSON.parse(loggedInUser));
-    }
-  }, [navigate]);  
+    const initializePage = async () => {
+      try {
+        const loggedInUser = localStorage.getItem('loggedUser');
+        if (!loggedInUser) {
+          navigate('/login');
+          return;
+        }
+        setUser(JSON.parse(loggedInUser));
+        setPageLoading(false);
+      } catch (err) {
+        setError('Failed to load user data');
+        setPageLoading(false);
+      }
+    };
+
+    initializePage();
+  }, [navigate]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Pastikan file adalah gambar
+      // Validate file type
       if (!file.type.startsWith('image/')) {
-        //alert('File harus berupa gambar (JPG, PNG, GIF, dll)');
+        setError('File harus berupa gambar (JPG, PNG, GIF, dll)');
         return;
       }
       
-      // Batasi ukuran file (misalnya 2MB)
-      const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
+      // Validate file size (2MB limit)
+      const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
-        //alert('Ukuran gambar terlalu besar. Maksimal 2MB.');
+        setError('Ukuran gambar terlalu besar. Maksimal 2MB.');
         return;
       }
 
-      // Buat preview image
+      // Clear any previous errors
+      setError(null);
+
+      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -57,59 +73,146 @@ export default function TopicAddPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Clear previous states
+    setError(null);
+    setSuccess(false);
+    
+    // Validation
     if (!title.trim()) {
-      //alert('Judul topik tidak boleh kosong.');
+      setError('Judul topik tidak boleh kosong.');
       return;
     }
     
     if (!content.trim()) {
-      //alert('Konten diskusi tidak boleh kosong.');
+      setError('Konten diskusi tidak boleh kosong.');
       return;
     }
     
     setIsLoading(true);
     
-    // Simulasi loading untuk memberikan UX yang lebih baik
-    setTimeout(() => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       const newTopic = {
         username: user.username,
         title: title.trim(),
         content: content.trim(),
-        likes: [], // Array untuk menyimpan username user yang like
-        comments: [], // Array untuk menyimpan komentar
+        likes: [],
+        comments: [],
         createdAt: new Date().toISOString(),
       };
 
-      // Tambahkan image jika ada
       if (imagePreview) {
-        newTopic.imageUrl = imagePreview; // Simpan gambar sebagai base64
+        newTopic.imageUrl = imagePreview;
       }
 
       const existingTopics = JSON.parse(localStorage.getItem('topics')) || [];
       existingTopics.push(newTopic);
       localStorage.setItem('topics', JSON.stringify(existingTopics));
 
+      setSuccess(true);
+      
+      // Navigate after showing success
+      setTimeout(() => {
+        navigate('/topics');
+      }, 2000);
+      
+    } catch (err) {
+      setError('Gagal menambahkan topik. Silakan coba lagi.');
+    } finally {
       setIsLoading(false);
-      //alert('Topik diskusi berhasil ditambahkan.');
-      navigate('/topics');
-    }, 1000);
+    }
   };
+
+  const goBack = () => {
+    navigate('/topics');
+  };
+
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-gray-900 text-gray-100">
+        <Navbar />
+        <div className="max-w-3xl mx-auto py-8 px-4">
+          <div className="animate-pulse space-y-6">
+            {/* Back button skeleton */}
+            <div className="h-10 w-32 bg-gray-700 rounded-lg"></div>
+            
+            {/* Card skeleton */}
+            <div className="bg-gray-800 rounded-xl p-6">
+              <div className="h-8 bg-gray-700 rounded mb-6"></div>
+              <div className="space-y-4">
+                <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+                <div className="h-12 bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+                <div className="h-32 bg-gray-700 rounded"></div>
+                <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+                <div className="h-12 bg-gray-700 rounded"></div>
+                <div className="h-14 bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !title && !content) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-gray-900 text-gray-100 flex items-center justify-center">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl shadow-2xl p-12 text-center max-w-md mx-4 border border-red-500/30">
+          <div className="text-8xl mb-6">⚠️</div>
+          <h2 className="text-3xl font-bold text-red-400 mb-4">Oops!</h2>
+          <p className="text-gray-300 mb-8 text-lg">{error}</p>
+          <button 
+            onClick={goBack}
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <ChevronLeft size={20} />
+            Kembali ke Pustaka
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Success state
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-gray-900 text-gray-100 flex items-center justify-center">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl shadow-2xl p-12 text-center max-w-md mx-4 border border-green-500/30">
+          <div className="text-8xl mb-6">✅</div>
+          <h2 className="text-3xl font-bold text-green-400 mb-4">Berhasil!</h2>
+          <p className="text-gray-300 mb-8 text-lg">Topik diskusi berhasil ditambahkan.</p>
+          <div className="flex items-center justify-center gap-2 text-blue-400">
+            <Loader2 className="animate-spin" size={20} />
+            <span>Mengalihkan ke pustaka...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-gray-900 text-gray-100">
       <Navbar />
       
       <div className="max-w-3xl mx-auto py-8 px-4">
+        <nav className="flex items-center gap-2 text-sm text-blue-300 mb-8">
+          <button onClick={goBack} className="hover:text-blue-400 transition-colors font-medium">
+            Pustaka
+          </button>
+          <span className="text-gray-500">/</span>
+          <span className="text-blue-100 font-semibold">Buat Topik Baru</span>
+        </nav>
+
         <Link 
           to="/topics" 
-          className="inline-flex items-center px-4 py-2 mb-6 rounded-lg bg-blue-700 hover:bg-blue-600 transition-colors shadow-lg"
+          className="inline-flex items-center px-4 py-2 mb-6 rounded-lg bg-blue-700 hover:bg-blue-600 transition-all duration-200 shadow-lg transform hover:scale-105"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-          </svg>
+          <ChevronLeft size={20} className="mr-2" />
           Kembali ke Pustaka
         </Link>
         
@@ -117,12 +220,21 @@ export default function TopicAddPage() {
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-900 to-purple-900 px-6 py-4 border-b border-blue-500/30">
             <h1 className="text-2xl md:text-3xl font-bold font-fantasy text-blue-100 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mr-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-              </svg>
+              <Plus size={28} className="mr-3" />
               Buat Topik Diskusi Baru
             </h1>
           </div>
+          
+          {/* Error Alert */}
+          {error && (
+            <div className="mx-6 mt-6 bg-red-900/50 border border-red-500/50 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="text-red-400 mt-0.5 flex-shrink-0" size={20} />
+              <div className="text-red-300">
+                <p className="font-medium">Error</p>
+                <p className="text-sm">{error}</p>
+              </div>
+            </div>
+          )}
           
           {/* Form content */}
           <div className="px-6 py-5">
@@ -134,7 +246,8 @@ export default function TopicAddPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
-                  className="w-full p-4 border border-blue-500/50 rounded-lg bg-gray-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading}
+                  className="w-full p-4 border border-blue-500/50 rounded-lg bg-gray-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Masukkan judul topik diskusi yang menarik"
                 />
               </div>
@@ -145,7 +258,8 @@ export default function TopicAddPage() {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   required
-                  className="w-full p-4 border border-blue-500/50 rounded-lg min-h-40 bg-gray-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={isLoading}
+                  className="w-full p-4 border border-blue-500/50 rounded-lg min-h-40 bg-gray-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
                   placeholder="Tulis isi diskusi Anda secara detail di sini..."
                 ></textarea>
                 <p className="mt-2 text-sm text-blue-400/70">
@@ -155,61 +269,67 @@ export default function TopicAddPage() {
               
               <div>
                 <label className="block text-blue-300 font-medium mb-2">Gambar (Opsional)</label>
-                <div className="flex items-center space-x-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleImageChange}
-                      accept="image/*"
-                      className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-500 border border-blue-500/50 rounded"
-                    />
-                  </div>
-                  {imagePreview && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 transition-colors shadow-md text-sm"
-                    >
-                      Hapus
-                    </button>
-                  )}
-                </div>
-                
-                {imagePreview && (
-                  <div className="mt-4">
-                    <p className="text-sm text-blue-300 mb-2">Preview:</p>
-                    <div className="border border-blue-500/30 rounded-lg p-2 bg-gray-900/50">
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
-                        className="max-h-64 rounded mx-auto"
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex-1">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        disabled={isLoading}
+                        className="w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-500 file:transition-colors border border-blue-500/50 rounded-lg bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
+                    {imagePreview && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        disabled={isLoading}
+                        className="bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-500 transition-all duration-200 shadow-md text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <X size={16} />
+                        Hapus
+                      </button>
+                    )}
                   </div>
-                )}
+                  
+                  {imagePreview && (
+                    <div className="bg-gray-900/50 rounded-lg p-4 border border-blue-500/30">
+                      <p className="text-sm text-blue-300 mb-3 flex items-center gap-2">
+                        <Upload size={16} />
+                        Preview Gambar:
+                      </p>
+                      <div className="relative group">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="max-h-64 rounded-lg mx-auto shadow-lg transition-transform duration-200 group-hover:scale-105"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="pt-4">
                 <button 
                   type="submit" 
                   disabled={isLoading}
-                  className={`w-full py-3 rounded-lg shadow-lg font-medium text-lg flex items-center justify-center
-                    ${isLoading ? 'bg-blue-700 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition-all'}`}
+                  className={`w-full py-4 rounded-lg shadow-lg font-bold text-lg flex items-center justify-center gap-3 transition-all duration-200 transform hover:scale-105 ${
+                    isLoading 
+                      ? 'bg-blue-700 cursor-not-allowed opacity-75' 
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 hover:shadow-xl'
+                  }`}
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <Loader2 className="animate-spin" size={20} />
                       Memproses...
                     </>
                   ) : (
                     <>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
+                      <Plus size={20} />
                       Posting Diskusi
                     </>
                   )}
@@ -223,40 +343,34 @@ export default function TopicAddPage() {
           </div>
         </div>
 
-        {/* Panduan membuat topik */}
-        <div className="mt-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg p-5 border border-blue-500/30">
-          <h3 className="text-lg font-bold text-blue-300 mb-3 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
+        {/* Guidelines section with improved styling */}
+        <div className="mt-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg p-6 border border-blue-500/30">
+          <h3 className="text-xl font-bold text-blue-300 mb-4 flex items-center">
+            <AlertCircle size={20} className="mr-2" />
             Tips Membuat Topik Diskusi yang Baik
           </h3>
-          <ul className="text-gray-300 space-y-2 text-sm">
-            <li className="flex items-start">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Berikan judul yang jelas dan spesifik tentang topik yang ingin didiskusikan</span>
-            </li>
-            <li className="flex items-start">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Jelaskan pertanyaan atau pendapat Anda secara rinci dalam isi diskusi</span>
-            </li>
-            <li className="flex items-start">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Tambahkan gambar untuk memperjelas diskusi jika diperlukan</span>
-            </li>
-            <li className="flex items-start">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Gunakan bahasa yang sopan dan hormati pendapat anggota lain</span>
-            </li>
-          </ul>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="text-green-400 mt-0.5 flex-shrink-0" size={16} />
+                <span className="text-gray-300 text-sm">Berikan judul yang jelas dan spesifik tentang topik yang ingin didiskusikan</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="text-green-400 mt-0.5 flex-shrink-0" size={16} />
+                <span className="text-gray-300 text-sm">Jelaskan pertanyaan atau pendapat Anda secara rinci dalam isi diskusi</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="text-green-400 mt-0.5 flex-shrink-0" size={16} />
+                <span className="text-gray-300 text-sm">Tambahkan gambar untuk memperjelas diskusi jika diperlukan</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle className="text-green-400 mt-0.5 flex-shrink-0" size={16} />
+                <span className="text-gray-300 text-sm">Gunakan bahasa yang sopan dan hormati pendapat anggota lain</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

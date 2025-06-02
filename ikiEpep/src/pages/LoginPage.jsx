@@ -1,4 +1,4 @@
-// My LoginPage.jsx
+// LoginPage.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -6,7 +6,6 @@ import Navbar from '../components/Navbar';
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  // 1️⃣ Redirect away if already logged in (following friend's pattern)
   useEffect(() => {
     if (localStorage.getItem("token")) {
       navigate('/home', { replace: true });
@@ -37,7 +36,6 @@ export default function LoginPage() {
     }
 
     try {
-      // Replace with your actual API endpoint
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -47,7 +45,6 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        // 2️⃣ Store token and username (following friend's pattern)
         localStorage.setItem("token", data.token);
         localStorage.setItem('username', data.username);
         

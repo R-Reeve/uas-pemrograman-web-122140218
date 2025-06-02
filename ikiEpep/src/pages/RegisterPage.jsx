@@ -1,4 +1,4 @@
-// my RegisterPage.jsx
+// RegisterPage.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -6,7 +6,6 @@ import Navbar from '../components/Navbar';
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  // 1️⃣ Redirect away if already logged in (following friend's pattern)
   useEffect(() => {
     if (localStorage.getItem("token")) {
       navigate("/home", { replace: true });

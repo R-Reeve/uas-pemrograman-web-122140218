@@ -24,7 +24,6 @@ export default function Navbar() {
     
     checkLoginStatus();
     
-    // Menambahkan event listener untuk mendeteksi perubahan localStorage
     window.addEventListener('storage', checkLoginStatus);
     
     return () => {
@@ -36,7 +35,6 @@ export default function Navbar() {
     localStorage.removeItem('loggedUser');
     setLoggedIn(false);
     setUser(null);
-    //alert('Anda telah logout!');
     navigate('/login');
   };
   
